@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Catálogo: lectura pública, sin escritura desde la web.
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Órdenes: solo usuarios autenticados, y cada uno ve únicamente las suyas.
+    match /orders/{orderId} {
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+  }
+}

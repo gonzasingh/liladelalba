@@ -1,0 +1,292 @@
+// Catálogo de Lila del Alba, tomado de las listas de fragancias y de precios (PDF).
+// "stock" es un valor de ejemplo: ajustalo desde la consola de Firebase cuando quieras.
+// "priceX10" es el precio por unidad de la columna "x10 U." de la lista.
+
+const HOGAR = [
+  'Bamboo',
+  'Lemongrass',
+  'Mango & Maracuyá',
+  'Guayaba',
+  'Frambuesa & Pimienta',
+  'Tilo & Lavanda',
+  'Verbena & Flores Blancas',
+  'Melón & Sandía',
+  'Uva & Caramelo',
+];
+
+const PERSONAL = [
+  'Açaí',
+  'Nikki',
+  'Moras & Fresias',
+  'Gardenias',
+  'Coco & Vainilla',
+  'Cerezo en flor',
+  'Guayaba',
+  'Mora roja & Jabuticaba',
+];
+
+// Todas las fragancias son aptas para velas, difusores y spray textil.
+const TODAS = [...HOGAR, ...PERSONAL.filter((f) => !HOGAR.includes(f))];
+// Según los íconos de la lista de fragancias.
+const ACEITE = ['Nikki', 'Moras & Fresias', 'Gardenias', 'Coco & Vainilla', 'Cerezo en flor', 'Guayaba'];
+const JABON = [...ACEITE, 'Mora roja & Jabuticaba'];
+
+const aroma = (values) => ({ label: 'Fragancia', values });
+const ARCILLA = { label: 'Arcilla', values: ['Blanca', 'Café'] };
+
+export const products = [
+  // --- Aromas para el hogar ---
+  {
+    id: 'difusor-60ml',
+    name: 'Difusor 60 ml',
+    description: 'Difusor ambiental en envase plástico ámbar de 60 ml. Elegí la fragancia que más te guste.',
+    price: 3000,
+    category: 'hogar',
+    image: '/img/hogar.webp',
+    stock: 30,
+    options: [aroma(TODAS)],
+  },
+  {
+    id: 'difusor-125ml',
+    name: 'Difusor 125 ml',
+    description: 'Difusor ambiental en envase plástico ámbar de 125 ml. Elegí la fragancia que más te guste.',
+    price: 5500,
+    category: 'hogar',
+    image: '/img/hogar.webp',
+    stock: 25,
+    options: [aroma(TODAS)],
+  },
+  {
+    id: 'difusor-100ml-vidrio',
+    name: 'Difusor 100 ml en vidrio',
+    description: 'Difusor ambiental en envase de vidrio de 100 ml. Elegí la fragancia que más te guste.',
+    price: 7500,
+    category: 'hogar',
+    image: '/img/hogar.webp',
+    stock: 20,
+    options: [aroma(TODAS)],
+  },
+  {
+    id: 'difusor-auto-9ml',
+    name: 'Difusor para auto 9 ml',
+    description: 'Difusor para el auto de 9 ml. Elegí la fragancia que más te guste.',
+    price: 4800,
+    category: 'hogar',
+    image: '/img/hogar.webp',
+    stock: 40,
+    options: [aroma(TODAS)],
+  },
+  {
+    id: 'spray-textil-250ml',
+    name: 'Spray textil 250 ml',
+    description: 'Spray textil de 250 ml para ambientes y telas. Elegí la fragancia que más te guste.',
+    price: 6500,
+    category: 'hogar',
+    image: '/img/hogar.webp',
+    stock: 25,
+    options: [aroma(TODAS)],
+  },
+  {
+    id: 'vela-soja-90g',
+    name: 'Vela de soja 90 gr',
+    description: 'Vela de soja de 90 gr en envase de metal. Elegí la fragancia que más te guste.',
+    price: 6000,
+    category: 'hogar',
+    image: '/img/hogar.webp',
+    stock: 30,
+    options: [aroma(TODAS)],
+  },
+
+  // --- Jabones exfoliantes masajeadores ---
+  {
+    id: 'jabon-avena-carbon',
+    name: 'Jabón exfoliante masajeador',
+    description: 'Con avena coloidal y carbón activado. Sin aroma.',
+    price: 2000,
+    priceX10: 1800,
+    category: 'jabones',
+    image: '/img/jabones.webp',
+    stock: 60,
+  },
+  {
+    id: 'jabon-avena-carbon-arcilla',
+    name: 'Jabón exfoliante masajeador con arcilla',
+    description: 'Con avena coloidal y carbón activado, más arcilla blanca o café. Sin aroma.',
+    price: 2500,
+    priceX10: 2300,
+    category: 'jabones',
+    image: '/img/jabones.webp',
+    stock: 60,
+    options: [ARCILLA],
+  },
+  {
+    id: 'jabon-avena-carbon-aroma',
+    name: 'Jabón exfoliante masajeador aromático',
+    description: 'Con avena coloidal y carbón activado, con el aroma que elijas.',
+    price: 3500,
+    priceX10: 3300,
+    category: 'jabones',
+    image: '/img/jabones.webp',
+    stock: 50,
+    options: [aroma(JABON)],
+  },
+  {
+    id: 'jabon-avena-carbon-arcilla-aroma',
+    name: 'Jabón exfoliante masajeador con arcilla y aroma',
+    description: 'Con avena coloidal y carbón activado, más arcilla blanca o café, con el aroma que elijas.',
+    price: 4000,
+    priceX10: 3800,
+    category: 'jabones',
+    image: '/img/jabones.webp',
+    stock: 50,
+    options: [aroma(JABON), ARCILLA],
+  },
+
+  // --- Cremas corporales ---
+  {
+    id: 'crema-corporal-50cc',
+    name: 'Crema corporal 50 cc',
+    description: 'Crema corporal de 50 cc con el aroma que elijas.',
+    price: 4900,
+    priceX10: 4700,
+    category: 'cremas',
+    image: '/img/cremas.webp',
+    stock: 40,
+    options: [aroma(PERSONAL)],
+  },
+  {
+    id: 'crema-corporal-100cc',
+    name: 'Crema corporal 100 cc',
+    description: 'Crema corporal de 100 cc con el aroma que elijas.',
+    price: 5100,
+    priceX10: 4900,
+    category: 'cremas',
+    image: '/img/cremas.webp',
+    stock: 40,
+    options: [aroma(PERSONAL)],
+  },
+
+  // --- Aceites corporales ---
+  {
+    id: 'aceite-corporal-50cc',
+    name: 'Aceite corporal 50 cc',
+    description: 'Con almendras, karité, jojoba y vitamina E. Sin aroma.',
+    price: 8750,
+    priceX10: 8550,
+    category: 'aceites',
+    image: '/img/aceites.webp',
+    stock: 30,
+  },
+  {
+    id: 'aceite-corporal-50cc-aroma',
+    name: 'Aceite corporal aromático 50 cc',
+    description: 'Con almendras, karité, jojoba y vitamina E, con el aroma que elijas.',
+    price: 8950,
+    priceX10: 8750,
+    category: 'aceites',
+    image: '/img/aceites.webp',
+    stock: 30,
+    options: [aroma(ACEITE)],
+  },
+  {
+    id: 'aceite-corporal-100cc',
+    name: 'Aceite corporal 100 cc',
+    description: 'Con almendras, karité, jojoba y vitamina E. Sin aroma.',
+    price: 15100,
+    priceX10: 14900,
+    category: 'aceites',
+    image: '/img/aceites.webp',
+    stock: 20,
+  },
+  {
+    id: 'aceite-corporal-100cc-aroma',
+    name: 'Aceite corporal aromático 100 cc',
+    description: 'Con almendras, karité, jojoba y vitamina E, con el aroma que elijas.',
+    price: 15480,
+    priceX10: 15280,
+    category: 'aceites',
+    image: '/img/aceites.webp',
+    stock: 20,
+    options: [aroma(ACEITE)],
+  },
+
+  // --- Sérum hidratante ---
+  {
+    id: 'serum-30cc-plastico',
+    name: 'Sérum hidratante 30 cc',
+    description: 'Con ácido hialurónico y niacinamida. Envase plástico con válvula gota a gota.',
+    price: 6800,
+    priceX10: 6600,
+    category: 'serum',
+    image: '/img/serum.webp',
+    stock: 25,
+  },
+  {
+    id: 'serum-30cc-vidrio',
+    name: 'Sérum hidratante 30 cc en vidrio',
+    description: 'Con ácido hialurónico y niacinamida. Envase de vidrio con gotero.',
+    price: 8000,
+    priceX10: 7800,
+    category: 'serum',
+    image: '/img/serum.webp',
+    stock: 25,
+  },
+
+  // --- Bálsamo labial ---
+  {
+    id: 'balsamo-labial-5cc',
+    name: 'Bálsamo labial 5 cc',
+    description: 'En envase plástico de 5 cc. Opcional con color.',
+    price: 3500,
+    priceX10: 3300,
+    category: 'balsamo',
+    image: '/img/serum.webp',
+    stock: 50,
+    options: [{ label: 'Versión', values: ['Sin color', 'Con color'] }],
+  },
+  {
+    id: 'balsamo-labial-10cc',
+    name: 'Bálsamo labial 10 cc',
+    description: 'En envase metálico de 10 cc. Opcional con color.',
+    price: 3700,
+    priceX10: 3500,
+    category: 'balsamo',
+    image: '/img/serum.webp',
+    stock: 50,
+    options: [{ label: 'Versión', values: ['Sin color', 'Con color'] }],
+  },
+
+  // --- Ducha cuerpo y cabello ---
+  {
+    id: 'shampoo-solido',
+    name: 'Shampoo sólido',
+    description: 'Shampoo sólido para la caída de cabello, el cabello seco o el cabello graso.',
+    price: 7500,
+    priceX10: 7300,
+    category: 'ducha',
+    image: '/img/ducha.webp',
+    stock: 30,
+    options: [{ label: 'Tipo de cabello', values: ['Caída de cabello', 'Cabello seco', 'Cabello graso'] }],
+  },
+  {
+    id: 'acondicionador-solido',
+    name: 'Acondicionador sólido',
+    description: 'Acondicionador sólido humectante, sin TACC.',
+    price: 7500,
+    priceX10: 7300,
+    category: 'ducha',
+    image: '/img/ducha.webp',
+    stock: 30,
+  },
+  {
+    id: 'body-splash',
+    name: 'Body splash',
+    description: 'Body splash con la fragancia que elijas.',
+    price: 8000,
+    priceX10: 7800,
+    category: 'ducha',
+    image: '/img/ducha.webp',
+    stock: 30,
+    options: [aroma(PERSONAL)],
+  },
+].map((product, index) => ({ ...product, order: index + 1 }));
