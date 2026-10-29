@@ -67,7 +67,7 @@ Los productos, precios, fotos y colores salen de las listas de la marca (PDF).
 - **Fotos**: salen de los PDF y se reutilizan por categoría (`public/img`). Para fotos propias de cada producto, reemplazá el archivo y el campo `image` del producto. Bálsamo labial usa la foto del sérum porque la lista no trae una propia.
 - **Fragancias por producto**: están tomadas de los íconos de la lista de fragancias (por ejemplo, Açaí solo en body splash y crema).
 - **Precio "x10 U."**: se aplica cuando el carrito suma 10 o más unidades del mismo producto, aunque tengan fragancias distintas.
-- **Instagram**: el enlace del pie de página usa `@liladelalba`, que se lee en las etiquetas de las fotos. Confirmá que sea el correcto.
+- **Instagram**: el enlace del pie de página usa `@liladelalba`.
 
 ## Sobre `npm audit`
 

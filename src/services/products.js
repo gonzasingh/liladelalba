@@ -4,7 +4,7 @@ import { db } from '../firebase/config';
 const byOrder = (a, b) => (a.order ?? 0) - (b.order ?? 0);
 const toProduct = (snapshot) => ({ id: snapshot.id, ...snapshot.data() });
 
-// Sin categoryId trae todo el catálogo; con categoryId, solo esa categoría.
+// revisar si Sin categoryId trae todo el catálogo
 export async function getProducts(categoryId) {
   const productsRef = collection(db, 'products');
   const source = categoryId ? query(productsRef, where('category', '==', categoryId)) : productsRef;

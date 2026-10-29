@@ -1,5 +1,5 @@
 // Carga (o actualiza) el catálogo en Cloud Firestore.
-// Uso: npm run seed   (necesita el archivo .env con los datos de Firebase)
+// Uso: npm run seed   (necesitO el archivo .env con los datos de Firebase)
 import { initializeApp } from 'firebase/app';
 import { doc, getFirestore, writeBatch } from 'firebase/firestore';
 import { products } from './products.mjs';

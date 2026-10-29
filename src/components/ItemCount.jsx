@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-// Selector de cantidad: nunca permite superar "max" (el stock que todavía se puede agregar).
+// Selector de cantidad: nunca permite superar "max" (chequearel stock que todavía se puede agregar).
 export default function ItemCount({ max, onAdd, disabled = false }) {
   const [count, setCount] = useState(1);
   const value = Math.min(count, Math.max(max, 1));

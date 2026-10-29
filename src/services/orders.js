@@ -1,7 +1,7 @@
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
-// Guarda la orden en la colección "orders" y devuelve el ID generado por Firestore.
+// revisar si guarda la orden en la colección "orders" y devuelve el ID generado por Firestore.
 export async function createOrder({ user, buyer, items, totalQuantity, total }) {
   const order = {
     userId: user.uid,

@@ -1,5 +1,5 @@
-// Catálogo de Lila del Alba, tomado de las listas de fragancias y de precios (PDF).
-// "stock" es un valor de ejemplo: ajustalo desde la consola de Firebase cuando quieras.
+// Catálogo de Lila del Alba, Sacado del PDF.
+// "stock" revisar desde la consola de Firebase dependiendo del cliente.
 // "priceX10" es el precio por unidad de la columna "x10 U." de la lista.
 
 const HOGAR = [

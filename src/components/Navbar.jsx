@@ -14,7 +14,7 @@ export default function Navbar() {
       await logout();
       navigate('/');
     } catch {
-      // Cerrar sesión no depende de la red: si falla, el usuario puede intentarlo de nuevo.
+      // revisar: cerrar sesión no depende de la red, si falla, el usuario puede intentarlo de nuevo.
     }
   };
 
