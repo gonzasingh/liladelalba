@@ -1,4 +1,4 @@
-/* Lila del Alba: PALETA Y DISEÑO DEL BRANDING */
+/* Lila del Alba: paleta tomada de las listas de precios (PDF) */
 :root {
   --bg: #fef7ff;
   --surface: #ffffff;
@@ -927,4 +927,449 @@ textarea.input {
     align-items: center;
     justify-content: space-between;
   }
+}
+
+/* ---------- Confirmación con WhatsApp ---------- */
+.confirmation .btn {
+  margin: 4px;
+}
+
+/* ---------- Panel de administración ---------- */
+.admin {
+  padding-top: 24px;
+}
+
+.admintabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.admintab {
+  padding: 9px 22px;
+  border: 1px solid var(--lav);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--purple);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.admintab:hover {
+  background: var(--lilac-soft);
+}
+
+.admintab.is-active {
+  border-color: var(--purple);
+  background: var(--purple);
+  color: #fff;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.stats--two {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.stat {
+  padding: 16px 20px;
+  border: 1px solid var(--lav);
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.stat__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--muted);
+}
+
+.stat__value {
+  margin: 6px 0 0;
+  color: var(--purple);
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.dot {
+  display: inline-block;
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.dot--disponible {
+  background: #2f6fbd;
+}
+
+.dot--vendido {
+  background: #2e7d4f;
+}
+
+.dot--parcial {
+  background: #c98a1b;
+}
+
+.dot--deuda {
+  background: #b83a3a;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 12px;
+  border: 1px solid var(--lav);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.panel {
+  margin-bottom: 20px;
+  padding: 22px 24px;
+  border: 1px solid var(--lav);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.panel__title {
+  margin-bottom: 6px;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.panel__title--lg {
+  margin: 28px 0 14px;
+}
+
+.panel__hint {
+  margin: 0 0 12px;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.inline-form .input {
+  width: auto;
+  min-width: 140px;
+  flex: 1 1 150px;
+}
+
+.inline-form .input--wide {
+  flex: 2 1 260px;
+}
+
+.inline-form .input--narrow,
+.input--narrow {
+  min-width: 0;
+  width: 84px;
+  flex: 0 0 84px;
+}
+
+.filefield {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--purple);
+  font-weight: 500;
+}
+
+.filefield input {
+  max-width: 220px;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.input--cell {
+  min-width: 0;
+  width: 110px;
+  padding: 7px 12px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.saleitem,
+.pending {
+  padding: 14px 0;
+  border-top: 1px solid var(--lav);
+}
+
+.saleitem__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px minmax(150px, auto) auto;
+  align-items: center;
+  gap: 16px;
+}
+
+.saleitem__name {
+  margin: 0;
+  font-weight: 600;
+}
+
+.saleitem__meta {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.saleitem__bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--lav);
+  overflow: hidden;
+}
+
+.bar__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--muted);
+}
+
+.bar__fill--vendido {
+  background: #2e7d4f;
+}
+
+.bar__fill--parcial {
+  background: #c98a1b;
+}
+
+.bar__fill--deuda {
+  background: #b83a3a;
+}
+
+.saleitem__amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.95rem;
+}
+
+.saleitem__amount span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.saleitem__action {
+  margin-top: 8px;
+}
+
+.pending__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pending__items {
+  margin: 10px 0 4px;
+  padding-left: 20px;
+}
+
+.tablewrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.table th,
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--lav);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table th {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.table .num {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.is-income {
+  color: var(--ok);
+}
+
+.is-expense {
+  color: var(--danger);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stepper .btn {
+  padding: 4px 12px;
+}
+
+@media (max-width: 860px) {
+  .saleitem__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .saleitem__bar {
+    grid-column: 1 / -1;
+    order: 4;
+  }
+}
+
+/* ---------- Pago y envío ---------- */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.fieldset legend {
+  padding: 0;
+  margin-bottom: 6px;
+  color: var(--purple);
+  font-weight: 500;
+}
+
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 2px solid var(--lav);
+  border-radius: 16px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.radio:has(input:checked) {
+  border-color: var(--purple);
+  background: var(--lilac-soft);
+}
+
+.radio input {
+  accent-color: var(--purple);
+}
+
+.summary__hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.summary__rows dt small {
+  display: block;
+}
+
+.fineprint {
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* ---------- Resumen del carrito (datos de envío y pago) ---------- */
+.summary .input {
+  border-radius: 22px;
+}
+
+.summary__block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary__subtitle {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.summary__pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.summary__totals {
+  padding-top: 14px;
+  border-top: 1px solid rgba(103, 80, 164, 0.2);
+}
+
+.summary__hint {
+  text-align: center;
+  color: var(--purple);
+}
+
+.btn--dark:disabled {
+  border-color: var(--lav);
+  background: var(--lav);
+  color: #fff;
+  opacity: 1;
+}
+
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+
+.review div {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 12px;
+}
+
+.review dt {
+  color: var(--muted);
+}
+
+.review dd {
+  margin: 0;
+  font-weight: 500;
 }

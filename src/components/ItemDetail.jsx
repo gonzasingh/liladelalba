@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ItemCount from './ItemCount';
 import { getCategory } from '../data/categories';
-import { BULK_MIN_QUANTITY, useCart } from '../context/CartContext';
+import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/format';
+import { BULK_MIN_QUANTITY } from '../utils/pricing';
 
 export default function ItemDetail({ product }) {
   const { addItem, getQuantityInCart } = useCart();
@@ -100,8 +101,8 @@ export default function ItemDetail({ product }) {
               <Link className="btn btn--dark btn--sm" to="/cart">
                 Ver carrito
               </Link>
-              <Link className="btn btn--ghost btn--sm" to="/checkout">
-                Finalizar compra
+              <Link className="btn btn--ghost btn--sm" to="/">
+                Seguir comprando
               </Link>
             </div>
           </div>

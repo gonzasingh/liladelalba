@@ -5,21 +5,39 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { auth } from '../firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase/config';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  // "loading" es true hasta que Firebase informa si hay una sesión guardada.
+  const [isAdmin, setIsAdmin] = useState(false);
+  // "loading" es true hasta que Firebase informa si hay una sesión guardada y si es administradora.
   const [loading, setLoading] = useState(true);
 
   useEffect(
     () =>
       onAuthStateChanged(
         auth,
-        (currentUser) => {
+        async (currentUser) => {
+          if (!currentUser) {
+            setUser(null);
+            setIsAdmin(false);
+            setLoading(false);
+            return;
+          }
+
+          setLoading(true);
+          let admin = false;
+          try {
+            // Las administradoras figuran en la colección "admins", con su UID como ID del documento.
+            admin = (await getDoc(doc(db, 'admins', currentUser.uid))).exists();
+          } catch {
+            admin = false;
+          }
           setUser(currentUser);
+          setIsAdmin(admin);
           setLoading(false);
         },
         () => setLoading(false)
@@ -32,8 +50,8 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => signOut(auth), []);
 
   const value = useMemo(
-    () => ({ user, loading, register, login, logout }),
-    [user, loading, register, login, logout]
+    () => ({ user, isAdmin, loading, register, login, logout }),
+    [user, isAdmin, loading, register, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

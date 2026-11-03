@@ -1,8 +1,9 @@
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
-// revisar si guarda la orden en la colección "orders" y devuelve el ID generado por Firestore.
-export async function createOrder({ user, buyer, items, totalQuantity, total }) {
+// Guarda la orden en la colección "orders" y devuelve el ID generado por Firestore.
+// Queda "pendiente" hasta que el panel de administración la confirme.
+export async function createOrder({ user, buyer, items, totalQuantity, paymentMethod, subtotal, surcharge, shipping, total }) {
   const order = {
     userId: user.uid,
     userEmail: user.email,
@@ -14,10 +15,16 @@ export async function createOrder({ user, buyer, items, totalQuantity, total }) 
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       subtotal: item.subtotal,
+      surcharge: item.surcharge,
     })),
     totalQuantity,
+    payment: { method: paymentMethod },
+    subtotal,
+    surcharge,
+    shipping,
     total,
-    status: 'generada',
+    channel: 'web',
+    status: 'pendiente',
     createdAt: serverTimestamp(),
   };
 

@@ -1,31 +1,51 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { CARD_SURCHARGE_RATE, findZoneByProvince, PROVINCES, SHIPPING_CARRIER } from '../data/checkout';
+import { BULK_MIN_QUANTITY } from '../utils/pricing';
+import { getOrderErrors } from '../utils/orderValidation';
 
 const CartContext = createContext(null);
 
 const STORAGE_KEY = 'lila-del-alba:cart';
 
-// A partir de esta cantidad de un mismo producto se aplica el precio "x10 U." de la lista.
-export const BULK_MIN_QUANTITY = 10;
+const EMPTY_DELIVERY = { name: '', postalCode: '', province: '', city: '', address: '' };
+
+const text = (value) => (typeof value === 'string' ? value : '');
 
 function loadCart() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return Array.isArray(saved) ? saved : [];
+    // Formato anterior: solo la lista de productos.
+    const data = Array.isArray(saved) ? { items: saved } : (saved ?? {});
+    const delivery = data.delivery ?? {};
+    return {
+      items: Array.isArray(data.items) ? data.items : [],
+      delivery: {
+        name: text(delivery.name),
+        postalCode: text(delivery.postalCode),
+        province: PROVINCES.includes(delivery.province) ? delivery.province : '',
+        city: text(delivery.city),
+        address: text(delivery.address),
+      },
+    };
   } catch {
-    return [];
+    return { items: [], delivery: EMPTY_DELIVERY };
   }
 }
 
 export function CartProvider({ children }) {
-  const [items, setItems] = useState(loadCart);
+  const [saved] = useState(loadCart);
+  const [items, setItems] = useState(saved.items);
+  // El método de pago no se guarda: cada vez que se abre la tienda arranca en "Selecciona una opción".
+  const [paymentMethod, setPaymentMethodState] = useState(null);
+  const [delivery, setDelivery] = useState(saved.delivery);
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ items, delivery }));
     } catch {
       // Si el navegador no permite guardar, el carrito sigue funcionando en memoria.
     }
-  }, [items]);
+  }, [items, delivery]);
 
   // Cada línea del carrito es un producto + una variante (por ejemplo, el aroma elegido).
   const addItem = useCallback((product, quantity, variant = null) => {
@@ -65,7 +85,17 @@ export function CartProvider({ children }) {
     setItems((current) => current.filter((item) => item.key !== key));
   }, []);
 
-  const clearCart = useCallback(() => setItems([]), []);
+  // Vacía el carrito y también el método de pago y los datos de envío cargados.
+  const clearCart = useCallback(() => {
+    setItems([]);
+    setPaymentMethodState(null);
+    setDelivery(EMPTY_DELIVERY);
+  }, []);
+
+  const setPaymentMethod = useCallback((method) => setPaymentMethodState(method || null), []);
+  const setDeliveryField = useCallback((field, value) => {
+    setDelivery((current) => ({ ...current, [field]: value }));
+  }, []);
 
   const value = useMemo(() => {
     const quantityByProduct = {};
@@ -76,19 +106,41 @@ export function CartProvider({ children }) {
     const pricedItems = items.map((item) => {
       const bulk = item.priceX10 != null && quantityByProduct[item.id] >= BULK_MIN_QUANTITY;
       const unitPrice = bulk ? item.priceX10 : item.price;
-      return { ...item, unitPrice, bulk, subtotal: unitPrice * item.quantity };
+      const subtotal = unitPrice * item.quantity;
+      // El recargo de la tarjeta se calcula sobre cada producto, nunca sobre el envío.
+      const surcharge = paymentMethod === 'tarjeta' ? Math.round(subtotal * CARD_SURCHARGE_RATE) : 0;
+      return { ...item, unitPrice, bulk, subtotal, surcharge };
     });
+
+    const subtotal = pricedItems.reduce((sum, item) => sum + item.subtotal, 0);
+    const surcharge = pricedItems.reduce((sum, item) => sum + item.surcharge, 0);
+    const zone = findZoneByProvince(delivery.province);
+    const shipping =
+      items.length > 0 && zone
+        ? { carrier: SHIPPING_CARRIER, zone: zone.label, province: delivery.province, cost: zone.price }
+        : null;
+    const orderErrors = getOrderErrors(delivery, paymentMethod);
 
     return {
       items: pricedItems,
       totalQuantity: pricedItems.reduce((sum, item) => sum + item.quantity, 0),
-      totalPrice: pricedItems.reduce((sum, item) => sum + item.subtotal, 0),
+      subtotal,
+      surcharge,
+      shipping,
+      total: subtotal + surcharge + (shipping?.cost ?? 0),
+      paymentMethod,
+      delivery,
+      orderErrors,
+      // Solo se puede finalizar con productos, todos los datos de envío y un método de pago.
+      isOrderComplete: items.length > 0 && Object.keys(orderErrors).length === 0,
+      setPaymentMethod,
+      setDeliveryField,
       getQuantityInCart: (productId) => quantityByProduct[productId] ?? 0,
       addItem,
       removeItem,
       clearCart,
     };
-  }, [items, addItem, removeItem, clearCart]);
+  }, [items, paymentMethod, delivery, setPaymentMethod, setDeliveryField, addItem, removeItem, clearCart]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

@@ -2,19 +2,43 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Catálogo: lectura pública, sin escritura desde la web.
-    match /products/{productId} {
-      allow read: if true;
+    // Administradoras: figuran en "admins" con su UID como ID del documento.
+    // Ese documento se crea a mano desde la consola de Firebase (ver README).
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;
     }
 
-    // Órdenes: solo usuarios autenticados, y cada uno ve únicamente las suyas.
+    // Catálogo: lectura pública. Solo el panel de administración puede modificarlo.
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Pedidos de la web: cada cliente crea y ve los suyos; el panel ve y gestiona todos.
     match /orders/{orderId} {
       allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid;
       allow read: if request.auth != null
-                  && resource.data.userId == request.auth.uid;
-      allow update, delete: if false;
+                  && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Control interno: solo administradoras.
+    match /sales/{id} {
+      allow read, write: if isAdmin();
+    }
+    match /movements/{id} {
+      allow read, write: if isAdmin();
+    }
+    match /settings/{id} {
+      allow read, write: if isAdmin();
     }
   }
 }

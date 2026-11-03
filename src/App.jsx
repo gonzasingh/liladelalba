@@ -1,6 +1,10 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import AdminLayout from './components/admin/AdminLayout';
+import CashTab from './components/admin/CashTab';
+import SalesTab from './components/admin/SalesTab';
+import StockTab from './components/admin/StockTab';
 import AuthPage from './components/AuthPage';
 import Cart from './components/Cart';
 import Checkout from './components/Checkout';
@@ -28,6 +32,12 @@ export default function App() {
                 <Route path="/login" element={<AuthPage mode="login" />} />
                 <Route path="/register" element={<AuthPage mode="register" />} />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<Navigate to="ventas" replace />} />
+                  <Route path="ventas" element={<SalesTab />} />
+                  <Route path="stock" element={<StockTab />} />
+                  <Route path="caja" element={<CashTab />} />
+                </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

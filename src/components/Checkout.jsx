@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AuthForm from './AuthForm';
-import CheckoutForm from './CheckoutForm';
 import Loader from './Loader';
 import Message from './Message';
+import OrderConfirmation from './OrderConfirmation';
+import OrderTotals from './OrderTotals';
+import ShippingNote from './ShippingNote';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { createOrder } from '../services/orders';
+import { getPaymentLabel } from '../data/checkout';
+import { useOrderSubmit } from '../hooks/useOrderSubmit';
 import { formatPrice } from '../utils/format';
 
-function OrderSummary({ items, totalQuantity, totalPrice }) {
+function OrderSummary({ items }) {
   return (
     <aside className="summary" aria-label="Resumen de tu pedido">
       <h2 className="summary__title">Tu pedido</h2>
@@ -24,77 +27,40 @@ function OrderSummary({ items, totalQuantity, totalPrice }) {
           </li>
         ))}
       </ul>
-      <dl className="summary__rows">
-        <div>
-          <dt>Unidades</dt>
-          <dd>{totalQuantity}</dd>
-        </div>
-        <div className="summary__total">
-          <dt>Total</dt>
-          <dd>{formatPrice(totalPrice)}</dd>
-        </div>
-      </dl>
+      <OrderTotals detailed />
     </aside>
   );
 }
 
+// Paso final: pide ingresar si no hay sesión y, con sesión, confirma el pedido cargado en el carrito.
 export default function Checkout() {
   const { user, loading: authLoading } = useAuth();
-  const { items, totalQuantity, totalPrice, clearCart } = useCart();
-
+  const { items, delivery, paymentMethod, isOrderComplete } = useCart();
+  const { submit, saving, error, confirmation } = useOrderSubmit();
   const [authMode, setAuthMode] = useState('login');
-  const [orderId, setOrderId] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
-  const handleSubmit = async (buyer) => {
-    if (saving || items.length === 0) return;
-
-    setSaving(true);
-    setError('');
-    try {
-      const id = await createOrder({ user, buyer, items, totalQuantity, total: totalPrice });
-      // El carrito se vacía recién cuando Firestore confirmó que la orden se guardó.
-      clearCart();
-      setOrderId(id);
-    } catch {
-      setError('No pudimos registrar tu compra. Tu carrito sigue intacto, probá de nuevo en unos instantes.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (orderId) {
-    return (
-      <section className="confirmation" aria-labelledby="confirmation-title">
-        <h1 id="confirmation-title" className="page-title">
-          ¡Gracias por tu compra!
-        </h1>
-        <p>Registramos tu orden. Guardá este ID para consultar tu pedido:</p>
-        <p className="confirmation__id">{orderId}</p>
-        <Link className="btn btn--dark" to="/">
-          Volver a la tienda
-        </Link>
-      </section>
-    );
-  }
+  if (confirmation) return <OrderConfirmation confirmation={confirmation} />;
 
   if (authLoading) return <Loader text="Verificando tu sesión…" />;
 
   if (!user) {
     return (
-      <section className="checkout" aria-labelledby="checkout-title">
-        <div>
-          <h1 id="checkout-title" className="page-title">
-            Finalizar compra
-          </h1>
-          <p className="checkout__lead">
-            Para confirmar tu pedido necesitás ingresar a tu cuenta. Tu carrito se mantiene mientras tanto.
-          </p>
-          <AuthForm key={authMode} mode={authMode} onSwitch={setAuthMode} />
-        </div>
-        {items.length > 0 && <OrderSummary items={items} totalQuantity={totalQuantity} totalPrice={totalPrice} />}
-      </section>
+      <>
+        <section className="checkout" aria-labelledby="checkout-title">
+          <div>
+            <h1 id="checkout-title" className="page-title">
+              Finalizar compra
+            </h1>
+            <p className="checkout__lead">
+              Para confirmar tu pedido necesitás ingresar a tu cuenta. Tu carrito y tus datos de envío se mantienen
+              mientras tanto.
+            </p>
+            <AuthForm key={authMode} mode={authMode} onSwitch={setAuthMode} />
+          </div>
+          {items.length > 0 && <OrderSummary items={items} />}
+        </section>
+        <ShippingNote />
+      </>
     );
   }
 
@@ -113,16 +79,68 @@ export default function Checkout() {
     );
   }
 
+  if (!isOrderComplete) {
+    return (
+      <Message
+        title="Faltan datos para finalizar"
+        action={
+          <Link className="btn btn--dark" to="/cart">
+            Volver al carrito
+          </Link>
+        }
+      >
+        Completá los datos de envío y elegí el método de pago en el carrito para poder confirmar tu pedido.
+      </Message>
+    );
+  }
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    submit();
+  };
+
   return (
-    <section className="checkout" aria-labelledby="checkout-title">
-      <div>
-        <h1 id="checkout-title" className="page-title">
-          Finalizar compra
-        </h1>
-        <p className="checkout__lead">Compra como {user.email}.</p>
-        <CheckoutForm defaultEmail={user.email ?? ''} submitting={saving} error={error} onSubmit={handleSubmit} />
-      </div>
-      <OrderSummary items={items} totalQuantity={totalQuantity} totalPrice={totalPrice} />
-    </section>
+    <>
+      <section className="checkout" aria-labelledby="checkout-title">
+        <form className="form" onSubmit={handleSubmit}>
+          <h1 id="checkout-title" className="page-title">
+            Confirmá tu pedido
+          </h1>
+          <p className="checkout__lead">Compra como {user.email}.</p>
+
+          <dl className="review">
+            <div>
+              <dt>Nombre</dt>
+              <dd>{delivery.name}</dd>
+            </div>
+            <div>
+              <dt>Dirección</dt>
+              <dd>
+                {delivery.address}, {delivery.city}, {delivery.province} (CP {delivery.postalCode})
+              </dd>
+            </div>
+            <div>
+              <dt>Método de pago</dt>
+              <dd>{getPaymentLabel(paymentMethod)}</dd>
+            </div>
+          </dl>
+          <Link className="linkbtn" to="/cart">
+            Editar en el carrito
+          </Link>
+
+          {error && (
+            <p className="form__error" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button type="submit" className="btn btn--dark btn--block" disabled={saving}>
+            {saving ? 'Procesando tu compra…' : 'Confirmar y enviar por WhatsApp'}
+          </button>
+        </form>
+        <OrderSummary items={items} />
+      </section>
+      <ShippingNote />
+    </>
   );
 }

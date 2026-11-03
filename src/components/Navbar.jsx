@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 const pillClass = ({ isActive }) => `pill${isActive ? ' is-active' : ''}`;
 
 export default function Navbar() {
-  const { user, loading, logout } = useAuth();
+  const { user, isAdmin, loading, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -14,7 +14,7 @@ export default function Navbar() {
       await logout();
       navigate('/');
     } catch {
-      // revisar: cerrar sesión no depende de la red, si falla, el usuario puede intentarlo de nuevo.
+      // Cerrar sesión no depende de la red: si falla, el usuario puede intentarlo de nuevo.
     }
   };
 
@@ -29,6 +29,11 @@ export default function Navbar() {
           {!loading &&
             (user ? (
               <>
+                {isAdmin && (
+                  <Link className="btn btn--dark btn--sm" to="/admin">
+                    Panel
+                  </Link>
+                )}
                 <span className="navbar__user" title={user.email}>
                   {user.email}
                 </span>

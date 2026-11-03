@@ -12,3 +12,6 @@ export const normalizeText = (text) =>
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
+
+// Código corto para identificar ventas y pedidos (últimos 4 caracteres del ID).
+export const shortId = (id) => `#${String(id).slice(-4).toUpperCase()}`;
