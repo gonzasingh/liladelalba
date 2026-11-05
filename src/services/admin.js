@@ -36,6 +36,8 @@ export const addProduct = (data) => addDoc(collection(db, 'products'), { ...data
 
 export const updateProduct = (id, patch) => updateDoc(doc(db, 'products', id), patch);
 
+export const deleteProduct = (id) => deleteDoc(doc(db, 'products', id));
+
 export const changeStock = (id, delta) => updateDoc(doc(db, 'products', id), { stock: increment(delta) });
 
 export async function loadInitialCatalog(initialProducts, existingIds = []) {
@@ -43,7 +45,7 @@ export async function loadInitialCatalog(initialProducts, existingIds = []) {
   initialProducts
     .filter((product) => !existingIds.includes(product.id))
     .forEach(({ id, ...data }) => {
-      batch.set(doc(db, 'products', id), { ...data, cost: 0, lot: 'viejo', addedAt: serverTimestamp() });
+      batch.set(doc(db, 'products', id), { ...data, cost: 0, addedAt: serverTimestamp() });
     });
   await batch.commit();
 }

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import ProductImage from './ProductImage';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/format';
 
@@ -8,7 +9,7 @@ export default function CartItem({ item }) {
   return (
     <li className="cartitem">
       <Link to={`/item/${item.id}`} className="cartitem__img">
-        <img src={item.image} alt="" />
+        <ProductImage src={item.image} />
       </Link>
 
       <div className="cartitem__info">

@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react';
+import FragranceDropdown from './FragranceDropdown';
+import ProductEditor from './ProductEditor';
 import Loader from '../Loader';
 import Message from '../Message';
 import { CATEGORIES, getCategory } from '../../data/categories';
-import { getLotLabel, LOTS, PAYMENT_METHODS } from '../../data/admin';
+import { PAYMENT_METHODS } from '../../data/admin';
+import { ALL_CHOICES, buildOptions, getSelectedChoices } from '../../data/fragrances';
 import { INITIAL_PRODUCTS } from '../../data/initialProducts';
 import { useCollection } from '../../hooks/useCollection';
 import {
@@ -16,9 +19,25 @@ import {
 import { formatPrice, shortId } from '../../utils/format';
 import { resizeImage } from '../../utils/image';
 import { unitPriceFor } from '../../utils/pricing';
-import { getWeekRange, toDate } from '../../utils/weeks';
 
-const lotOf = (product) => product.lot ?? 'viejo';
+function PencilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function ImageIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <circle cx="9" cy="9" r="1.6" />
+      <path d="m21 15-5-5L5 21" />
+    </svg>
+  );
+}
 
 function OfflineSaleForm({ products }) {
   const [productId, setProductId] = useState('');
@@ -169,8 +188,8 @@ function AddProductForm({ nextOrder }) {
     cost: '',
     quantity: '',
     category: CATEGORIES[0].id,
-    lot: 'nuevo',
   });
+  const [choices, setChoices] = useState([]);
   const [photo, setPhoto] = useState(null);
   const [fileKey, setFileKey] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -212,12 +231,13 @@ function AddProductForm({ nextOrder }) {
         cost,
         stock,
         category: form.category,
-        lot: form.lot,
         image,
+        options: buildOptions(choices),
         order: nextOrder,
       });
       setDone(`"${form.name.trim()}" se agregó al stock y ya se ve en la tienda.`);
       setForm((current) => ({ ...current, name: '', description: '', price: '', cost: '', quantity: '' }));
+      setChoices([]);
       setPhoto(null);
       setFileKey((key) => key + 1);
     } catch (err) {
@@ -245,13 +265,10 @@ function AddProductForm({ nextOrder }) {
             </option>
           ))}
         </select>
-        <select className="input" value={form.lot} onChange={set('lot')} aria-label="Lote">
-          {LOTS.map((lot) => (
-            <option key={lot.id} value={lot.id}>
-              {lot.label}
-            </option>
-          ))}
-        </select>
+        <div className="inline-form__break" />
+        <div className="inline-form__dropdown">
+          <FragranceDropdown selected={choices} onChange={setChoices} ariaLabel="Fragancias y colores" />
+        </div>
         <label className="filefield">
           Foto
           <input key={fileKey} type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
@@ -274,10 +291,9 @@ function AddProductForm({ nextOrder }) {
   );
 }
 
-function StockRow({ product, reserved }) {
+function StockRow({ product, reserved, onEdit }) {
   const [error, setError] = useState('');
   const category = getCategory(product.category);
-  const addedAt = toDate(product.addedAt);
 
   const save = async (action) => {
     setError('');
@@ -305,12 +321,18 @@ function StockRow({ product, reserved }) {
   return (
     <tr>
       <td>
+        <button type="button" className="iconbtn" onClick={() => onEdit(product.id)} aria-label={`Editar ${product.name}`}>
+          <PencilIcon />
+        </button>
+      </td>
+      <td>
         <strong>{product.name}</strong>
         {error && <small className="field__error"> {error}</small>}
       </td>
       <td>{category?.short ?? product.category}</td>
-      <td>{getLotLabel(product.lot)}</td>
-      <td>{addedAt ? getWeekRange(addedAt) : '—'}</td>
+      <td>
+        <FragranceDropdown readOnly selected={getSelectedChoices(product)} ariaLabel={`Fragancias y colores de ${product.name}`} />
+      </td>
       <td>
         <input
           className="input input--cell"
@@ -344,7 +366,7 @@ function StockRow({ product, reserved }) {
         <div className="stepper">
           <button
             type="button"
-            className="btn btn--ghost btn--sm"
+            className="roundbtn"
             disabled={soldOut}
             onClick={() => save(() => changeStock(product.id, -1))}
             aria-label={`Restar una unidad de ${product.name}`}
@@ -362,7 +384,7 @@ function StockRow({ product, reserved }) {
           />
           <button
             type="button"
-            className="btn btn--ghost btn--sm"
+            className="roundbtn"
             onClick={() => save(() => changeStock(product.id, 1))}
             aria-label={`Sumar una unidad de ${product.name}`}
           >
@@ -378,11 +400,10 @@ export default function StockTab() {
   const products = useCollection('products');
   const orders = useCollection('orders', { orderField: 'createdAt', max: 200 });
 
-  const [lot, setLot] = useState('');
+  const [choice, setChoice] = useState('');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
+  const [editingId, setEditingId] = useState(null);
   const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [catalogError, setCatalogError] = useState('');
 
@@ -398,26 +419,25 @@ export default function StockTab() {
     return reserved;
   }, [orders.data]);
 
-  const valueByLot = useMemo(() => {
-    const totals = { viejo: 0, nuevo: 0 };
-    products.data.forEach((product) => {
-      totals[lotOf(product)] += (product.cost ?? 0) * (product.stock ?? 0);
-    });
-    return totals;
-  }, [products.data]);
+  // Valor de todo el stock: a lo que costó y a lo que se vende.
+  const stockValue = useMemo(
+    () => ({
+      cost: products.data.reduce((sum, p) => sum + (p.cost ?? 0) * (p.stock ?? 0), 0),
+      sale: products.data.reduce((sum, p) => sum + (p.price ?? 0) * (p.stock ?? 0), 0),
+    }),
+    [products.data]
+  );
 
   const visible = useMemo(
     () =>
       products.data.filter((product) => {
-        if (lot && lotOf(product) !== lot) return false;
+        if (choice && !getSelectedChoices(product).includes(choice)) return false;
         if (category && product.category !== category) return false;
         if (status === 'disponible' && !(product.stock > 0)) return false;
         if (status === 'sin-stock' && product.stock > 0) return false;
-        if (minPrice !== '' && product.price < Number(minPrice)) return false;
-        if (maxPrice !== '' && product.price > Number(maxPrice)) return false;
         return true;
       }),
-    [products.data, lot, category, status, minPrice, maxPrice]
+    [products.data, choice, category, status]
   );
 
   const handleLoadCatalog = async () => {
@@ -438,6 +458,8 @@ export default function StockTab() {
   if (error) return <Message type="error" title="Algo salió mal">{error}</Message>;
 
   const nextOrder = Math.max(0, ...products.data.map((p) => p.order ?? 0)) + 1;
+  // Si el producto se elimina, la ventana de edición se cierra sola.
+  const editing = products.data.find((p) => p.id === editingId);
 
   return (
     <>
@@ -445,12 +467,12 @@ export default function StockTab() {
 
       <div className="stats stats--two">
         <div className="stat">
-          <p className="stat__label">Stock viejo, valor a costo</p>
-          <p className="stat__value">{formatPrice(valueByLot.viejo)}</p>
+          <p className="stat__label">Stock Valor a costo</p>
+          <p className="stat__value">{formatPrice(stockValue.cost)}</p>
         </div>
         <div className="stat">
-          <p className="stat__label">Ingreso nuevo, valor a costo</p>
-          <p className="stat__value">{formatPrice(valueByLot.nuevo)}</p>
+          <p className="stat__label">Stock Valor de venta</p>
+          <p className="stat__value">{formatPrice(stockValue.sale)}</p>
         </div>
       </div>
 
@@ -472,11 +494,11 @@ export default function StockTab() {
 
       <section className="panel" aria-label="Productos en stock">
         <div className="inline-form">
-          <select className="input" value={lot} onChange={(e) => setLot(e.target.value)} aria-label="Filtrar por lote">
-            <option value="">Todos los lotes</option>
-            {LOTS.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.label}
+          <select className="input" value={choice} onChange={(e) => setChoice(e.target.value)} aria-label="Filtrar por fragancia o color">
+            <option value="">Todas las fragancias</option>
+            {ALL_CHOICES.map((name) => (
+              <option key={name} value={name}>
+                {name}
               </option>
             ))}
           </select>
@@ -493,9 +515,7 @@ export default function StockTab() {
             <option value="disponible">Disponible</option>
             <option value="sin-stock">Sin stock</option>
           </select>
-          <input className="input" type="number" min="0" placeholder="Precio mín." value={minPrice} onChange={(e) => setMinPrice(e.target.value)} aria-label="Precio mínimo" />
-          <input className="input" type="number" min="0" placeholder="Precio máx." value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} aria-label="Precio máximo" />
-          <span className="muted">
+          <span className="muted inline-form__count">
             {visible.length} de {products.data.length} productos
           </span>
         </div>
@@ -505,10 +525,13 @@ export default function StockTab() {
             <table className="table">
               <thead>
                 <tr>
+                  <th>
+                    <span className="sr-only">Editar</span>
+                    <ImageIcon />
+                  </th>
                   <th>Producto</th>
                   <th>Categoría</th>
-                  <th>Lote</th>
-                  <th>Semana</th>
+                  <th>Fragancias</th>
                   <th>Costo</th>
                   <th>Precio</th>
                   <th>Estado</th>
@@ -517,13 +540,15 @@ export default function StockTab() {
               </thead>
               <tbody>
                 {visible.map((product) => (
-                  <StockRow key={product.id} product={product} reserved={reservedById[product.id] ?? 0} />
+                  <StockRow key={product.id} product={product} reserved={reservedById[product.id] ?? 0} onEdit={setEditingId} />
                 ))}
               </tbody>
             </table>
           </div>
         )}
       </section>
+
+      {editing && <ProductEditor key={editing.id} product={editing} onClose={() => setEditingId(null)} />}
     </>
   );
 }

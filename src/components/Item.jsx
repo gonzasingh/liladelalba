@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import ProductImage from './ProductImage';
 import { formatPrice } from '../utils/format';
 
 export default function Item({ product }) {
@@ -7,7 +8,7 @@ export default function Item({ product }) {
   return (
     <article className="card">
       <Link to={`/item/${product.id}`} className="card__img" tabIndex={-1} aria-hidden="true">
-        <img src={product.image} alt="" loading="lazy" />
+        <ProductImage src={product.image} loading="lazy" />
       </Link>
       <div className="card__body">
         <h3 className="card__title">

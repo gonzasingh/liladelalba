@@ -54,7 +54,7 @@ export default function Cart() {
           </button>
         </div>
 
-        <OrderPanel onFinalize={handleFinalize} busy={saving || authLoading} error={error} />
+        <OrderPanel onFinalize={handleFinalize} saving={saving} waiting={authLoading} error={error} />
       </section>
       <ShippingNote />
     </>

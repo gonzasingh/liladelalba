@@ -42,13 +42,13 @@ export const SHIPPING_ZONES = [
   {
     id: 'noa',
     label: 'NOA',
-    price: 39000,
+    price: 10500,
     provinces: ['Catamarca', 'Jujuy', 'La Rioja', 'Salta', 'Santiago del Estero', 'Tucumán'],
   },
   {
     id: 'centro',
     label: 'Centro',
-    price: 39000,
+    price: 13000,
     provinces: [
       'Buenos Aires',
       'CABA',
@@ -68,7 +68,7 @@ export const SHIPPING_ZONES = [
   {
     id: 'patagonia',
     label: 'Patagonia y destinos lejanos',
-    price: 57000,
+    price: 17500,
     provinces: ['Chubut', 'Neuquén', 'Río Negro', 'Santa Cruz', 'Tierra del Fuego'],
   },
 ];

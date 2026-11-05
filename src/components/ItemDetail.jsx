@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ItemCount from './ItemCount';
+import ProductImage from './ProductImage';
 import { getCategory } from '../data/categories';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/format';
@@ -36,7 +37,7 @@ export default function ItemDetail({ product }) {
   return (
     <article className="detail">
       <div className="detail__media">
-        <img src={product.image} alt={product.name} />
+        <ProductImage src={product.image} alt={product.name} />
       </div>
 
       <div className="detail__info">

@@ -46,7 +46,7 @@ function CountRow({ label, field, expected, real }) {
       <td className="num">{formatPrice(expected)}</td>
       <td>
         <input
-          className="input input--cell"
+          className="input input--cell input--count"
           type="number"
           min="0"
           placeholder="Lo que hay"

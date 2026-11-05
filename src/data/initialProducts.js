@@ -3,6 +3,8 @@
 // "stock" es un valor de ejemplo: ajustalo desde el panel cuando quieras.
 // "priceX10" es el precio por unidad de la columna "x10 U." de la lista.
 
+import { FRAGRANCES } from './fragrances';
+
 const HOGAR = [
   'Bamboo',
   'Lemongrass',
@@ -32,7 +34,8 @@ const TODAS = [...HOGAR, ...PERSONAL.filter((f) => !HOGAR.includes(f))];
 const ACEITE = ['Nikki', 'Moras & Fresias', 'Gardenias', 'Coco & Vainilla', 'Cerezo en flor', 'Guayaba'];
 const JABON = [...ACEITE, 'Mora roja & Jabuticaba'];
 
-const aroma = (values) => ({ label: 'Fragancia', values });
+// Las fragancias siempre quedan en el orden de la lista de la marca.
+const aroma = (values) => ({ label: 'Fragancia', values: FRAGRANCES.filter((name) => values.includes(name)) });
 const ARCILLA = { label: 'Arcilla', values: ['Blanca', 'Café'] };
 
 export const INITIAL_PRODUCTS = [
@@ -243,7 +246,7 @@ export const INITIAL_PRODUCTS = [
     category: 'balsamo',
     image: '/img/serum.webp',
     stock: 50,
-    options: [{ label: 'Versión', values: ['Sin color', 'Con color'] }],
+    options: [{ label: 'Color', values: ['Con Color', 'Sin Color'] }],
   },
   {
     id: 'balsamo-labial-10cc',
@@ -254,7 +257,7 @@ export const INITIAL_PRODUCTS = [
     category: 'balsamo',
     image: '/img/serum.webp',
     stock: 50,
-    options: [{ label: 'Versión', values: ['Sin color', 'Con color'] }],
+    options: [{ label: 'Color', values: ['Con Color', 'Sin Color'] }],
   },
 
   // --- Ducha cuerpo y cabello ---

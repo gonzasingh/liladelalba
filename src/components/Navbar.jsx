@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import CartWidget from './CartWidget';
 import { CATEGORIES } from '../data/categories';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,8 @@ const pillClass = ({ isActive }) => `pill${isActive ? ' is-active' : ''}`;
 export default function Navbar() {
   const { user, isAdmin, loading, logout } = useAuth();
   const navigate = useNavigate();
+  // En el panel de control no se muestran las categorías de la tienda.
+  const inAdmin = useLocation().pathname.startsWith('/admin');
 
   const handleLogout = async () => {
     try {
@@ -19,7 +21,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="navbar">
+    <header className={`navbar${inAdmin ? ' navbar--compact' : ''}`}>
       <div className="container navbar__top">
         <Link to="/" className="navbar__brand" aria-label="Lila del Alba, ir al inicio">
           <img src="/img/logo.png" alt="Lila del Alba" />
@@ -55,18 +57,20 @@ export default function Navbar() {
         </div>
       </div>
 
-      <nav className="catnav" aria-label="Categorías">
-        <div className="container catnav__list">
-          <NavLink to="/" end className={pillClass}>
-            Todos
-          </NavLink>
-          {CATEGORIES.map((category) => (
-            <NavLink key={category.id} to={`/category/${category.id}`} className={pillClass}>
-              {category.short}
+      {!inAdmin && (
+        <nav className="catnav" aria-label="Categorías">
+          <div className="container catnav__list">
+            <NavLink to="/" end className={pillClass}>
+              Todos
             </NavLink>
-          ))}
-        </div>
-      </nav>
+            {CATEGORIES.map((category) => (
+              <NavLink key={category.id} to={`/category/${category.id}`} className={pillClass}>
+                {category.short}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
+      )}
     </header>
   );
 }

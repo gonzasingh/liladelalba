@@ -5,7 +5,8 @@ import { PROVINCES, STORE_PAYMENT_METHODS } from '../data/checkout';
 import { useCart } from '../context/CartContext';
 
 // Resumen del carrito: datos de envío, método de pago, totales y botón para finalizar.
-export default function OrderPanel({ onFinalize, busy, error }) {
+// saving: se está guardando el pedido. waiting: todavía se verifica la sesión (el botón espera, sin cambiar el texto).
+export default function OrderPanel({ onFinalize, saving, waiting = false, error }) {
   const { delivery, paymentMethod, orderErrors, isOrderComplete, setDeliveryField, setPaymentMethod } = useCart();
   const [touched, setTouched] = useState({});
 
@@ -111,8 +112,8 @@ export default function OrderPanel({ onFinalize, busy, error }) {
         </p>
       )}
 
-      <button type="button" className="btn btn--dark btn--block" disabled={!isOrderComplete || busy} onClick={onFinalize}>
-        {busy ? 'Procesando tu compra…' : 'Finalizar compra'}
+      <button type="button" className="btn btn--dark btn--block" disabled={!isOrderComplete || saving || waiting} onClick={onFinalize}>
+        {saving ? 'Procesando tu compra…' : 'Finalizar compra'}
       </button>
       <Link className="btn btn--ghost btn--block" to="/">
         Seguir comprando
