@@ -1232,12 +1232,6 @@ textarea.input {
   color: var(--danger);
 }
 
-.stepper {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
 @media (max-width: 860px) {
   .saleitem__row {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -1435,30 +1429,6 @@ textarea.input {
   background: var(--lilac-soft);
 }
 
-.roundbtn {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border: 2px solid var(--purple);
-  border-radius: 50%;
-  background: var(--surface);
-  color: var(--purple);
-  font-size: 1.3rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.roundbtn:hover:not(:disabled) {
-  background: var(--lilac-soft);
-}
-
-.roundbtn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
 .table th svg {
   vertical-align: middle;
   color: var(--purple);
@@ -1470,6 +1440,11 @@ textarea.input {
 
 .inline-form select.input {
   min-width: 180px;
+}
+
+.inline-form .input--num {
+  min-width: 110px;
+  flex: 1 1 110px;
 }
 
 .inline-form__break {
@@ -1491,8 +1466,32 @@ textarea.input {
   min-width: 0;
 }
 
-.table .fd {
-  min-width: 250px;
+.table--stock th,
+.table--stock td {
+  padding: 10px 8px;
+}
+
+.table--stock th:first-child,
+.table--stock td:first-child {
+  width: 44px;
+  padding-inline: 4px;
+}
+
+.table--stock .input--cell {
+  width: 96px;
+  padding: 7px 6px 7px 10px;
+}
+
+.table--stock .input--stock {
+  width: 80px;
+}
+
+.table--stock .fd {
+  min-width: 190px;
+}
+
+.table--stock .badge {
+  padding-inline: 10px;
 }
 
 .fd .fd__button {
@@ -1521,24 +1520,53 @@ textarea.input {
 .fd__panel {
   position: fixed;
   z-index: 80;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   border: 2px solid var(--purple);
   border-radius: 18px;
   background: var(--surface);
   box-shadow: 0 14px 34px rgba(46, 36, 71, 0.2);
 }
 
+.fd__head {
+  flex: none;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--lav);
+}
+
 .fd__tools {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 8px 16px;
   padding: 10px 14px 2px;
   font-size: 0.9rem;
 }
 
+.fd__new {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 0;
+}
+
+.fd__new .input {
+  flex: 1 1 180px;
+  min-width: 0;
+  padding: 8px 14px;
+}
+
+.fd__error {
+  flex-basis: 100%;
+}
+
 .fd__list {
+  flex: 1;
+  min-height: 0;
   margin: 0;
   padding: 6px 0;
+  overflow-y: auto;
   list-style: none;
 }
 

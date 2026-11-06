@@ -2,6 +2,7 @@ import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom';
 import Loader from '../Loader';
 import Message from '../Message';
 import { useAuth } from '../../context/AuthContext';
+import { FragranceProvider } from '../../context/FragranceContext';
 
 const tabClass = ({ isActive }) => `admintab${isActive ? ' is-active' : ''}`;
 
@@ -44,7 +45,9 @@ export default function AdminLayout() {
           Caja
         </NavLink>
       </nav>
-      <Outlet />
+      <FragranceProvider>
+        <Outlet />
+      </FragranceProvider>
     </section>
   );
 }

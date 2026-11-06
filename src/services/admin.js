@@ -3,7 +3,6 @@ import {
   collection,
   deleteDoc,
   doc,
-  increment,
   runTransaction,
   serverTimestamp,
   setDoc,
@@ -37,8 +36,6 @@ export const addProduct = (data) => addDoc(collection(db, 'products'), { ...data
 export const updateProduct = (id, patch) => updateDoc(doc(db, 'products', id), patch);
 
 export const deleteProduct = (id) => deleteDoc(doc(db, 'products', id));
-
-export const changeStock = (id, delta) => updateDoc(doc(db, 'products', id), { stock: increment(delta) });
 
 export async function loadInitialCatalog(initialProducts, existingIds = []) {
   const batch = writeBatch(db);
@@ -233,5 +230,8 @@ export const cancelWebOrder = (orderId) =>
 export const addMovement = (data) => addDoc(collection(db, 'movements'), movementData(data));
 
 export const deleteMovement = (id) => deleteDoc(doc(db, 'movements', id));
+
+// Fragancias que se suman a las 16 de la marca. Se guardan en settings/fragrances.
+export const saveCustomFragrances = (custom) => setDoc(doc(db, 'settings', 'fragrances'), { custom }, { merge: true });
 
 export const saveCashCount = (patch) => setDoc(doc(db, 'settings', 'cashCount'), patch, { merge: true });

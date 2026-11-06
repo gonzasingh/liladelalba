@@ -1,16 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import FragranceDropdown from './FragranceDropdown';
 import ProductEditor from './ProductEditor';
 import Loader from '../Loader';
 import Message from '../Message';
 import { CATEGORIES, getCategory } from '../../data/categories';
+import { useFragrances } from '../../context/FragranceContext';
 import { PAYMENT_METHODS } from '../../data/admin';
-import { ALL_CHOICES, buildOptions, getSelectedChoices } from '../../data/fragrances';
+import { buildOptions, getSelectedChoices } from '../../data/fragrances';
 import { INITIAL_PRODUCTS } from '../../data/initialProducts';
 import { useCollection } from '../../hooks/useCollection';
 import {
   addProduct,
-  changeStock,
   describeError,
   loadInitialCatalog,
   registerOfflineSale,
@@ -181,6 +181,7 @@ function OfflineSaleForm({ products }) {
 }
 
 function AddProductForm({ nextOrder }) {
+  const { fragrances } = useFragrances();
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -232,7 +233,7 @@ function AddProductForm({ nextOrder }) {
         stock,
         category: form.category,
         image,
-        options: buildOptions(choices),
+        options: buildOptions(choices, [], fragrances),
         order: nextOrder,
       });
       setDone(`"${form.name.trim()}" se agregó al stock y ya se ve en la tienda.`);
@@ -255,9 +256,9 @@ function AddProductForm({ nextOrder }) {
       <form className="inline-form" onSubmit={handleSubmit}>
         <input className="input" placeholder="Producto" value={form.name} onChange={set('name')} aria-label="Producto" />
         <input className="input input--wide" placeholder="Descripción (opcional)" value={form.description} onChange={set('description')} aria-label="Descripción" />
-        <input className="input" type="number" min="0" placeholder="Precio venta" value={form.price} onChange={set('price')} aria-label="Precio de venta" />
-        <input className="input" type="number" min="0" placeholder="Costo" value={form.cost} onChange={set('cost')} aria-label="Costo" />
-        <input className="input" type="number" min="0" placeholder="Cantidad" value={form.quantity} onChange={set('quantity')} aria-label="Cantidad" />
+        <input className="input input--num" type="number" min="0" placeholder="Precio venta" value={form.price} onChange={set('price')} aria-label="Precio de venta" />
+        <input className="input input--num" type="number" min="0" placeholder="Costo" value={form.cost} onChange={set('cost')} aria-label="Costo" />
+        <input className="input input--num" type="number" min="0" placeholder="Cantidad" value={form.quantity} onChange={set('quantity')} aria-label="Cantidad" />
         <select className="input" value={form.category} onChange={set('category')} aria-label="Categoría">
           {CATEGORIES.map((category) => (
             <option key={category.id} value={category.id}>
@@ -291,7 +292,82 @@ function AddProductForm({ nextOrder }) {
   );
 }
 
+// Cuánto se espera después del último cambio antes de guardar (permite usar las flechitas varias veces seguidas).
+const SAVE_DELAY = 600;
+
+// Campo numérico de la tabla: guarda solo, al dejar de tocarlo, al salir del campo o al apretar Enter.
+function NumberCell({ value, onSave, label, integer = false, className = '' }) {
+  const [text, setText] = useState(String(value ?? 0));
+  const timer = useRef(null);
+  const focused = useRef(false);
+  const latest = useRef({});
+  latest.current = { text, value: value ?? 0, onSave };
+
+  // Si el valor cambia desde otro lado y no se está editando, se actualiza.
+  useEffect(() => {
+    if (!focused.current && timer.current === null) setText(String(value ?? 0));
+  }, [value]);
+
+  const commit = (raw) => {
+    clearTimeout(timer.current);
+    timer.current = null;
+    const { value: saved, onSave: save } = latest.current;
+    const number = Number(raw);
+    if (raw === '' || !Number.isFinite(number) || number < 0) {
+      setText(String(saved));
+      return;
+    }
+    const next = integer ? Math.floor(number) : number;
+    setText(String(next));
+    if (next !== saved) save(next);
+  };
+
+  // Si se sale de la pantalla con un cambio pendiente, se guarda igual.
+  useEffect(
+    () => () => {
+      if (timer.current !== null) {
+        clearTimeout(timer.current);
+        const { text: pending, value: saved, onSave: save } = latest.current;
+        const number = Number(pending);
+        if (pending !== '' && Number.isFinite(number) && number >= 0 && number !== saved) save(number);
+      }
+    },
+    []
+  );
+
+  return (
+    <input
+      className={`input input--cell ${className}`}
+      type="number"
+      min="0"
+      step={integer ? 1 : 'any'}
+      value={text}
+      aria-label={label}
+      onFocus={() => {
+        focused.current = true;
+      }}
+      onChange={(event) => {
+        const raw = event.target.value;
+        setText(raw);
+        clearTimeout(timer.current);
+        timer.current = setTimeout(() => commit(raw), SAVE_DELAY);
+      }}
+      onBlur={(event) => {
+        focused.current = false;
+        commit(event.target.value);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          commit(event.currentTarget.value);
+        }
+      }}
+    />
+  );
+}
+
 function StockRow({ product, reserved, onEdit }) {
+  const { fragrances } = useFragrances();
   const [error, setError] = useState('');
   const category = getCategory(product.category);
 
@@ -302,18 +378,6 @@ function StockRow({ product, reserved, onEdit }) {
     } catch (err) {
       setError(describeError(err));
     }
-  };
-
-  // Guarda un número al salir del campo, solo si cambió y es válido.
-  const handleBlur = (field) => (event) => {
-    const value = Number(event.target.value);
-    const current = product[field] ?? 0;
-    if (event.target.value === '' || !Number.isFinite(value) || value < 0) {
-      event.target.value = current;
-      return;
-    }
-    const next = field === 'stock' ? Math.floor(value) : value;
-    if (next !== current) save(() => updateProduct(product.id, { [field]: next }));
   };
 
   const soldOut = (product.stock ?? 0) <= 0;
@@ -331,28 +395,20 @@ function StockRow({ product, reserved, onEdit }) {
       </td>
       <td>{category?.short ?? product.category}</td>
       <td>
-        <FragranceDropdown readOnly selected={getSelectedChoices(product)} ariaLabel={`Fragancias y colores de ${product.name}`} />
+        <FragranceDropdown readOnly selected={getSelectedChoices(product, fragrances)} ariaLabel={`Fragancias y colores de ${product.name}`} />
       </td>
       <td>
-        <input
-          className="input input--cell"
-          type="number"
-          min="0"
-          defaultValue={product.cost ?? 0}
-          key={`cost-${product.cost}`}
-          onBlur={handleBlur('cost')}
-          aria-label={`Costo de ${product.name}`}
+        <NumberCell
+          value={product.cost}
+          label={`Costo de ${product.name}`}
+          onSave={(cost) => save(() => updateProduct(product.id, { cost }))}
         />
       </td>
       <td>
-        <input
-          className="input input--cell"
-          type="number"
-          min="0"
-          defaultValue={product.price}
-          key={`price-${product.price}`}
-          onBlur={handleBlur('price')}
-          aria-label={`Precio de ${product.name}`}
+        <NumberCell
+          value={product.price}
+          label={`Precio de ${product.name}`}
+          onSave={(price) => save(() => updateProduct(product.id, { price }))}
         />
       </td>
       <td>
@@ -363,40 +419,20 @@ function StockRow({ product, reserved, onEdit }) {
         {reserved > 0 && <small className="muted"> Pedidos web: {reserved}</small>}
       </td>
       <td>
-        <div className="stepper">
-          <button
-            type="button"
-            className="roundbtn"
-            disabled={soldOut}
-            onClick={() => save(() => changeStock(product.id, -1))}
-            aria-label={`Restar una unidad de ${product.name}`}
-          >
-            −
-          </button>
-          <input
-            className="input input--cell input--narrow"
-            type="number"
-            min="0"
-            defaultValue={product.stock ?? 0}
-            key={`stock-${product.stock}`}
-            onBlur={handleBlur('stock')}
-            aria-label={`Stock de ${product.name}`}
-          />
-          <button
-            type="button"
-            className="roundbtn"
-            onClick={() => save(() => changeStock(product.id, 1))}
-            aria-label={`Sumar una unidad de ${product.name}`}
-          >
-            +
-          </button>
-        </div>
+        <NumberCell
+          integer
+          className="input--stock"
+          value={product.stock}
+          label={`Stock de ${product.name}`}
+          onSave={(stock) => save(() => updateProduct(product.id, { stock }))}
+        />
       </td>
     </tr>
   );
 }
 
 export default function StockTab() {
+  const { fragrances, allChoices } = useFragrances();
   const products = useCollection('products');
   const orders = useCollection('orders', { orderField: 'createdAt', max: 200 });
 
@@ -431,13 +467,13 @@ export default function StockTab() {
   const visible = useMemo(
     () =>
       products.data.filter((product) => {
-        if (choice && !getSelectedChoices(product).includes(choice)) return false;
+        if (choice && !getSelectedChoices(product, fragrances).includes(choice)) return false;
         if (category && product.category !== category) return false;
         if (status === 'disponible' && !(product.stock > 0)) return false;
         if (status === 'sin-stock' && product.stock > 0) return false;
         return true;
       }),
-    [products.data, choice, category, status]
+    [products.data, fragrances, choice, category, status]
   );
 
   const handleLoadCatalog = async () => {
@@ -496,7 +532,7 @@ export default function StockTab() {
         <div className="inline-form">
           <select className="input" value={choice} onChange={(e) => setChoice(e.target.value)} aria-label="Filtrar por fragancia o color">
             <option value="">Todas las fragancias</option>
-            {ALL_CHOICES.map((name) => (
+            {allChoices.map((name) => (
               <option key={name} value={name}>
                 {name}
               </option>
@@ -522,7 +558,7 @@ export default function StockTab() {
 
         {visible.length > 0 && (
           <div className="tablewrap">
-            <table className="table">
+            <table className="table table--stock">
               <thead>
                 <tr>
                   <th>

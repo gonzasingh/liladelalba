@@ -35,12 +35,13 @@ const isColorOption = (option) => ['color', 'version'].includes(normalizeText(op
 const matchChoice = (list, value) => list.find((item) => normalizeText(item) === normalizeText(value));
 
 // Fragancias y colores que ofrece un producto, en el orden de la lista.
-export function getSelectedChoices(product) {
+// "fragrances" es la lista completa: las 16 de la marca más las que se agregaron desde el panel.
+export function getSelectedChoices(product, fragrances = FRAGRANCES) {
   const options = product.options ?? [];
   const found = new Set();
   options.filter(isFragranceOption).forEach((option) =>
     option.values.forEach((value) => {
-      const match = matchChoice(FRAGRANCES, value);
+      const match = matchChoice(fragrances, value);
       if (match) found.add(match);
     })
   );
@@ -50,7 +51,7 @@ export function getSelectedChoices(product) {
       if (match) found.add(match);
     })
   );
-  return ALL_CHOICES.filter((choice) => found.has(choice));
+  return [...fragrances, ...COLOR_CHOICES].filter((choice) => found.has(choice));
 }
 
 // Opciones del producto que el desplegable no maneja (por ejemplo, la arcilla de los jabones).
@@ -58,11 +59,11 @@ export const getOtherOptions = (product) =>
   (product.options ?? []).filter((option) => !isFragranceOption(option) && !isColorOption(option));
 
 // Arma las opciones que ve la clienta en la tienda a partir de lo elegido en el desplegable.
-export function buildOptions(choices, otherOptions = []) {
-  const fragrances = FRAGRANCES.filter((name) => choices.includes(name));
+export function buildOptions(choices, otherOptions = [], fragrances = FRAGRANCES) {
+  const chosenFragrances = fragrances.filter((name) => choices.includes(name));
   const colors = COLOR_CHOICES.filter((name) => choices.includes(name));
   return [
-    ...(fragrances.length ? [{ label: FRAGRANCE_LABEL, values: fragrances }] : []),
+    ...(chosenFragrances.length ? [{ label: FRAGRANCE_LABEL, values: chosenFragrances }] : []),
     ...(colors.length ? [{ label: COLOR_LABEL, values: colors }] : []),
     ...otherOptions,
   ];

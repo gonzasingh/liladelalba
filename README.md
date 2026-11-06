@@ -23,9 +23,9 @@ Los productos, precios, fotos y colores salen de las listas de la marca (PDF).
 - **Stock**:
   - Valor de todo el stock a costo y a precio de venta.
   - Venta fuera de la web.
-  - Alta de productos con foto y un desplegable para elegir sus fragancias y si es con o sin color.
+  - Alta de productos con foto y un desplegable para elegir sus fragancias y si es con o sin color. Desde el mismo desplegable se puede sumar una fragancia nueva con "Agregar nueva fragancia".
   - Tabla con filtros por fragancia, categoría y estado, y un desplegable por producto con sus fragancias y colores.
-  - Costo, precio y stock se editan directo en la tabla.
+  - Costo, precio y stock se editan directo en la tabla, con el campo numérico (flechitas o escribiendo). Se guardan solos, sin botones. La tabla entra completa en pantalla, sin barra de desplazamiento horizontal.
   - El lápiz de cada producto abre la edición completa: todos los datos, la foto (agregar, reemplazar o quitar) y eliminar el producto con confirmación.
 - **Caja**: efectivo y cuenta, arqueo ("debería tener" vs. "tiene"), egresos por destino y movimientos.
 
@@ -123,7 +123,7 @@ Si WhatsApp dice que el número no es válido, probá en `src/config.js` con `54
 - **Stock**: los valores iniciales son de ejemplo (las listas no lo indican). Editalos desde el panel.
 - **Costos**: empiezan en $ 0; cargalos en Stock para que el valor a costo sea real.
 - **Fotos**: las iniciales salen de los PDF y se reutilizan por categoría (`public/img`). Desde el panel se puede agregar, reemplazar o quitar la foto de cada producto; se achica y se guarda en Firestore. Un producto sin foto muestra el logo en la tienda. Bálsamo labial usa la foto del sérum porque la lista no trae una propia.
-- **Fragancias y colores**: lo que se elige en el desplegable es lo que la clienta puede elegir en la tienda. Opciones que el desplegable no maneja (la arcilla de los jabones y el tipo de cabello del shampoo) se conservan al editar.
+- **Fragancias y colores**: lo que se elige en el desplegable es lo que la clienta puede elegir en la tienda. Las fragancias nuevas se guardan en Firestore (`settings/fragrances`) y quedan disponibles en todo el panel; todavía no se pueden borrar desde el panel (se quitan editando ese documento en la consola de Firebase). Opciones que el desplegable no maneja (la arcilla de los jabones y el tipo de cabello del shampoo) se conservan al editar.
 - **Productos ya cargados**: siguen funcionando. Los datos de lote que tuvieran se ignoran.
 - **Fragancias por producto**: están tomadas de los íconos de la lista de fragancias (por ejemplo, Açaí solo en body splash y crema).
 - **Validación del código postal**: usa rangos numéricos por provincia (`src/data/postalCodes.js`), no la base completa del Correo. Detecta errores claros (4000 con Mendoza), pero en localidades de frontera algún código podría no coincidir. Si una clienta real queda bloqueada, ampliá el rango de su provincia en ese archivo.

@@ -2,12 +2,14 @@ import { useState } from 'react';
 import FragranceDropdown from './FragranceDropdown';
 import ProductImage from '../ProductImage';
 import { CATEGORIES } from '../../data/categories';
+import { useFragrances } from '../../context/FragranceContext';
 import { buildOptions, getOtherOptions, getSelectedChoices } from '../../data/fragrances';
 import { deleteProduct, describeError, updateProduct } from '../../services/admin';
 import { resizeImage } from '../../utils/image';
 
 // Ventana para modificar todos los datos de un producto, cambiar su foto o eliminarlo.
 export default function ProductEditor({ product, onClose }) {
+  const { fragrances } = useFragrances();
   const [form, setForm] = useState({
     name: product.name ?? '',
     description: product.description ?? '',
@@ -17,7 +19,7 @@ export default function ProductEditor({ product, onClose }) {
     stock: String(product.stock ?? 0),
     category: product.category ?? CATEGORIES[0].id,
   });
-  const [choices, setChoices] = useState(() => getSelectedChoices(product));
+  const [choices, setChoices] = useState(() => getSelectedChoices(product, fragrances));
   const [image, setImage] = useState(product.image ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -64,7 +66,7 @@ export default function ProductEditor({ product, onClose }) {
         stock,
         category: form.category,
         image,
-        options: buildOptions(choices, otherOptions),
+        options: buildOptions(choices, otherOptions, fragrances),
       });
       onClose();
     } catch (err) {
